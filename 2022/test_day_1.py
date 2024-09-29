@@ -1,9 +1,14 @@
 import pathlib
-import unittest
-from unittest.mock import patch
 
 
-def calc_max_calories(lines: list[str]) -> int:
+def get_elves_from_file(filepath: str) -> list[str]:
+    file = pathlib.Path(__file__).parent.resolve() / filepath
+    with open(file) as f:
+        lines = f.readlines()
+        return lines
+
+
+def calc_calories_per_elf(lines: list[str]) -> list[int]:
     calories = []
     pointer = 0
     while pointer < len(lines):
@@ -13,14 +18,20 @@ def calc_max_calories(lines: list[str]) -> int:
             pointer += 1
         calories.append(curr_calories)
         pointer += 1
-    return max(calories)
+    return calories
 
 
-def get_elves_from_file(filepath: str) -> list[str]:
-    file = pathlib.Path(__file__).parent.resolve() / filepath
-    with open(file) as f:
-        lines = f.readlines()
-        return lines
+def calc_top_one_calories(elves_calories: list[int]) -> int:
+    return max(elves_calories)
+
+
+def calc_top_n_total_calories(n: int, elves_calories: list[int]) -> int:
+    result = 0
+    elves_calories.sort(reverse=True)
+    for i in range(0, n):
+        result += elves_calories[i]
+
+    return result
 
 
 def test_calories():
@@ -32,11 +43,14 @@ def test_calories():
         "7000", "8000", "9000", "\n",
         "10000"
     ]
+    calories = calc_calories_per_elf(lines)
     expected_result = 24000
-    assert expected_result == calc_max_calories(lines)
+    assert expected_result == calc_top_one_calories(calories)
 
 
 if __name__ == "__main__":
+    filepath = "inputs/input_day_1.txt"
     lines = get_elves_from_file(filepath)
-    print(calc_max_calories(lines))
+    calories = calc_calories_per_elf(lines)
+    print(calc_top_n_total_calories(3, calories))
 
