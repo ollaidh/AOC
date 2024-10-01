@@ -12,9 +12,8 @@ figures_relations = {
     "C": {"X": 6, "Y": 0, "Z": 3},
 }
 
-required_results = {
-    "X": 0, "Y": 3, "Z": 6
-}
+required_results = {"X": 0, "Y": 3, "Z": 6}
+
 
 def get_data_from_file(filepath: str) -> list[list[str]]:
     file = pathlib.Path(__file__).parent.resolve() / filepath
@@ -26,6 +25,7 @@ def get_data_from_file(filepath: str) -> list[list[str]]:
             moves.append(move)
     return moves
 
+
 def define_my_moves(plan: list[list[str]]):
     for i in range(len(plan)):
         elf_move = plan[i][0]
@@ -35,6 +35,7 @@ def define_my_moves(plan: list[list[str]]):
                 plan[i][1] = key
     return plan
 
+
 def play_round(my_move: str, elf_move: str) -> int:
     return figures_relations[elf_move][my_move] + figures_weights[my_move]
 
@@ -42,8 +43,9 @@ def play_round(my_move: str, elf_move: str) -> int:
 def play(moves: list[list[str]]) -> int:
     result = 0
     for move in moves:
-        result  += play_round(move[1], move[0])
+        result += play_round(move[1], move[0])
     return result
+
 
 def test_play():
     moves = [
@@ -56,10 +58,8 @@ def test_play():
 
 
 if __name__ == "__main__":
-   data = get_data_from_file("inputs/input_day_2.txt")
-   first_part_result = play(data)
-   moves = define_my_moves(data)
-   second_part_result = play(moves)
-   print(second_part_result)
-
-
+    data = get_data_from_file("inputs/input_day_2.txt")
+    first_part_result = play(data)
+    moves = define_my_moves(data)
+    second_part_result = play(moves)
+    print(second_part_result)
