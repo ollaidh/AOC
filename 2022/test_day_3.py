@@ -1,17 +1,18 @@
 import pathlib
 
 
-def load_rucksacks(filepath: str) -> list[tuple[set, set]]:
-    rucksacks = []
+def load_rucksacks(filepath: str) -> list:
     with open(filepath) as f:
             lines = f.readlines()
-            for line in lines:
-                 line.rstrip()
-                 line_length = len(line)
-                 first_compartment = {line[i] for i in range(0, line_length // 2 )}
-                 second_compartment = {line[i] for i in range(line_length // 2, line_length)}
-                 rucksacks.append((first_compartment, second_compartment))
-    return rucksacks
+    return lines 
+
+
+def split_items_into_compartments(rucksack: str) -> tuple[set, set]:
+    rucksack.rstrip()
+    line_length = len(rucksack)
+    first_compartment = {rucksack[i] for i in range(0, line_length // 2 )}
+    second_compartment = {rucksack[i] for i in range(line_length // 2, line_length)}
+    return first_compartment, second_compartment
 
 
 def find_repeating_item(rucksack: tuple[set, set]) -> str | None:
@@ -29,12 +30,13 @@ def get_item_weight(item: str):
      
 
 if __name__ == "__main__":
-    print(ord("a"))
     filepath = file = pathlib.Path(__file__).parent.resolve() / "inputs/input_day_3.txt"
     rucksacks = load_rucksacks(str(filepath))
-    repeated_items_weight = 0
+    part_1_result = 0
     for rucksack in rucksacks:
+        rucksack = split_items_into_compartments(rucksack)
         item = find_repeating_item(rucksack)
         if item:
-            repeated_items_weight += get_item_weight(item)
-    print(repeated_items_weight)
+            part_1_result += get_item_weight(item)
+    print(part_1_result)
+
