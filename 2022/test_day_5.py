@@ -12,12 +12,15 @@ class Move:
 def get_stacks_plan(lines: list[str]) -> list[list[str]]:
     stacks = []
     for i in range(len(lines[0])):
+        if lines[-1][i] == " ":
+            continue
+
         curr_stack = []
         for j in range(len(lines) - 2, -1, -1):
-            if lines[len(lines) - 1][i] != " " and lines[j][i] != " " :
+            if lines[j][i] != " " :
                 curr_stack.append(lines[j][i])
-        if curr_stack:
-            stacks.append(curr_stack)
+        stacks.append(curr_stack)
+
     return stacks
 
 
@@ -41,6 +44,21 @@ def test_get_stacks():
         ["Z", "N"],
         ["M", "C", "D"],
         ["P"]
+    ]
+    stacks = get_stacks_plan(data)
+    assert stacks == expected
+
+    data = [
+        "    [D]        ",
+        "[N] [C]        ",
+        "[Z] [M] [P]    ",
+        " 1   2   3   4 ",
+    ]
+    expected = [
+        ["Z", "N"],
+        ["M", "C", "D"],
+        ["P"],
+        []
     ]
     stacks = get_stacks_plan(data)
     assert stacks == expected
