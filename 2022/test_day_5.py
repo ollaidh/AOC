@@ -4,13 +4,9 @@ from dataclasses import dataclass
 
 @dataclass
 class Move:
-    def __init__(self, amount: int, move_from: int, move_to: int):
-        self.amount = amount
-        self.move_from = move_from
-        self.move_to = move_to
-    
-    def __eq__(self, value: object) -> bool:
-        return self.amount == value.amount and self.move_from == value.move_from and self.move_to == value.move_to
+    amount: int
+    move_from: int
+    move_to: int
 
 
 def get_stacks_plan(lines: list[str]) -> list[list[str]]:
@@ -65,5 +61,12 @@ def test_get_plan():
     ]
     plan = get_moves_plan(data)
     assert plan == expected_result
+
+
+def test_move_objects_equal():
+    move1 = Move(1, 2, 1)
+    move2 = Move(1, 2, 1)
+    assert move1 == move2
+
 
 
