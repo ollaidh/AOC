@@ -1,5 +1,6 @@
 from pathlib import Path
 from dataclasses import dataclass
+from typing import Callable
 
 
 @dataclass
@@ -33,7 +34,7 @@ def get_moves_plan(lines: list[str]) -> list[Move]:
     return moves
 
 
-def move_stacks(stacks: list[list[str]], moves: list[Move]) -> list[list[str]]:
+def move_stacks_one_by_one(stacks: list[list[str]], moves: list[Move]) -> list[list[str]]:
     for move in moves:
         counter = 0
         while counter < move.amount:
@@ -44,17 +45,28 @@ def move_stacks(stacks: list[list[str]], moves: list[Move]) -> list[list[str]]:
     return stacks
 
 
+def move_stacks_by_packs(stacks: list[list[str]], moves: list[Move]) -> list[list[str]]:
+    for move in moves:
+        stacks[move.move_to].extend(stacks[move.move_from][(len(stacks[move.move_from]) - move.amount):])
+        stacks[move.move_from] = stacks[move.move_from][:(len(stacks[move.move_from]) - move.amount)]
+    return stacks
+
+
 def get_stacks_top_layer(stacks: list[list[str]]) -> str:
     tops = []
     for stack in stacks:
-        tops.append(stack[-1])
+        if stack:
+            tops.append(stack[-1])
+        else:
+            tops.append(" ")
+
     return ''.join(tops)
 
 
-def action(stacks: list[str], moves: list[str]) -> str:
+def action(stacks: list[str], moves: list[str], move_func: Callable) -> str:
     parsed_stacks = get_stacks_plan(stacks)
     parsed_moves = get_moves_plan(moves)
-    rearranged_stacks = move_stacks(parsed_stacks, parsed_moves)
+    rearranged_stacks = move_func(parsed_stacks, parsed_moves)
     result = get_stacks_top_layer(rearranged_stacks)
     return result
 
@@ -132,7 +144,7 @@ def test_move_objects_equal():
     assert move1 != move3
 
 
-def test_move_stacks():
+def test_move_stacks_one_by_one():
     stacks_input = [
         "    [D]    ",
         "[N] [C]    ",
@@ -153,7 +165,33 @@ def test_move_stacks():
 
     expected_result = "CMZ"
 
-    result = get_stacks_top_layer(move_stacks(stacks, moves))
+    result = get_stacks_top_layer(move_stacks_one_by_one(stacks, moves))
+
+    assert expected_result == result
+
+
+def test_move_stacks_by_pack():
+    stacks_input = [
+        "    [D]    ",
+        "[N] [C]    ",
+        "[Z] [M] [P]",
+        " 1   2   3 ",
+    ]
+
+    stacks = get_stacks_plan(stacks_input)
+
+    moves_input = [
+        "move 1 from 2 to 1",
+        "move 3 from 1 to 3",
+        "move 2 from 2 to 1",
+        "move 1 from 1 to 2"
+    ]
+
+    moves = get_moves_plan(moves_input)
+
+    expected_result = "MCD"
+
+    result = get_stacks_top_layer(move_stacks_by_packs(stacks, moves))
 
     assert expected_result == result
 
@@ -161,5 +199,7 @@ def test_move_stacks():
 if __name__ == "__main__":
     filepath = filepath = Path(__file__).parent.resolve() / "inputs/input_day_5.txt"
     stacks, moves = read_stacks_moves_from_file(filepath)
-    result_part_1 = action(stacks, moves)
+    result_part_1 = action(stacks, moves, move_stacks_one_by_one)
+    result_part_2 = action(stacks, moves, move_stacks_by_packs)
     print(result_part_1)
+    print(result_part_2)
