@@ -47,8 +47,9 @@ def move_stacks_one_by_one(stacks: list[list[str]], moves: list[Move]) -> list[l
 
 def move_stacks_by_packs(stacks: list[list[str]], moves: list[Move]) -> list[list[str]]:
     for move in moves:
-        stacks[move.move_to].extend(stacks[move.move_from][(len(stacks[move.move_from]) - move.amount):])
-        stacks[move.move_from] = stacks[move.move_from][:(len(stacks[move.move_from]) - move.amount)]
+        n = len(stacks[move.move_from]) - move.amount
+        stacks[move.move_to].extend(stacks[move.move_from][n:])
+        stacks[move.move_from] = stacks[move.move_from][:n]
     return stacks
 
 
