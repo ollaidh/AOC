@@ -51,6 +51,29 @@ def get_stacks_top_layer(stacks: list[list[str]]) -> str:
     return ''.join(tops)
 
 
+def action(stacks: list[str], moves: list[str]) -> str:
+    parsed_stacks = get_stacks_plan(stacks)
+    parsed_moves = get_moves_plan(moves)
+    rearranged_stacks = move_stacks(parsed_stacks, parsed_moves)
+    result = get_stacks_top_layer(rearranged_stacks)
+    return result
+
+
+def read_stacks_moves_from_file(filepath: Path) -> tuple:
+    mode = "stacks"
+    stacks = []
+    moves = []
+    with open(filepath) as f:
+        for line in f:
+            if line != "\n":
+                if mode == "stacks":
+                    stacks.append(line)
+                else:
+                    moves.append(line)
+            else:
+                mode = "moves"
+    return stacks, moves
+
 
 def test_get_stacks():
     data = [
@@ -135,6 +158,8 @@ def test_move_stacks():
     assert expected_result == result
 
 
-
-
-
+if __name__ == "__main__":
+    filepath = filepath = Path(__file__).parent.resolve() / "inputs/input_day_5.txt"
+    stacks, moves = read_stacks_moves_from_file(filepath)
+    result_part_1 = action(stacks, moves)
+    print(result_part_1)
