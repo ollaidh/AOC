@@ -33,6 +33,13 @@ def get_moves_plan(lines: list[str]) -> list[Move]:
     return moves
 
 
+def move_stacks(stacks: list[list[str]], moves: list[Move]):
+    for move in moves:
+        counter = 0
+        while counter <= move.amount:
+            stacks[move.move_from]
+
+
 def test_get_stacks():
     data = [
         "    [D]    ",
@@ -84,7 +91,10 @@ def test_get_plan():
 def test_move_objects_equal():
     move1 = Move(1, 2, 1)
     move2 = Move(1, 2, 1)
+    move3 = Move(2, 2, 1)
+
     assert move1 == move2
+    assert move1 != move3
 
 
 
