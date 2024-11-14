@@ -22,7 +22,7 @@ class Folder:
 def go(lines: list[str]) -> Folder:
     root_folder = Folder("/", None, [], [])
     curr_folder = root_folder
-    for line in lines:
+    for line in lines[1:]:
         words = line.split()
         if words[0] == "$":
             if words[1] == "cd":
