@@ -18,18 +18,26 @@ class Folder:
     files: list[File]
     folders: list[Self]
 
+    def get_child_folder(self, name: str) -> Self | None:
+        for folder in self.folders:
+            if folder.name == name:
+                return folder
+        return None
 
-def go(lines: list[str]) -> Folder:
+
+def parse_folder_from_lines(lines: list[str]) -> Folder:
     root_folder = Folder("/", None, [], [])
-    curr_folder = root_folder
+    curr_folder: Folder | None = root_folder
     for line in lines[1:]:
+        assert curr_folder is not None
         words = line.split()
         if words[0] == "$":
             if words[1] == "cd":
-                if words[2] == "..":
+                if words[2] == "..":                    
                     curr_folder = curr_folder.parent
                 else:
-                    curr_folder = Folder(words[2], curr_folder, [], [])
+                    curr_folder = curr_folder.get_child_folder(words[2])
+                    assert curr_folder is not None
         elif words[1] == "ls":
             pass
         elif words[0] == "dir":
@@ -39,7 +47,39 @@ def go(lines: list[str]) -> Folder:
     return root_folder
 
 
-def test_go():
+def test_folder_get_child_folder():
+    root = Folder("aaa", None, [], [])
+    
+    child1 = Folder("bbb_1", None, [], [])  # parents are skipped here
+    root.folders.append(child1)
+    
+    child2 = Folder("bbb_2", None, [], [])
+    root.folders.append(child2)
+
+    assert root.get_child_folder("bbb_1") is child1
+    assert root.get_child_folder("bbb_2") is child2
+    assert root.get_child_folder("zzz") is None
+
+
+def test_parse_folder_from_lines():
+    """
+    Parsing input to get the following folder structure:
+        - / (dir)
+            - a (dir)
+                - e (dir)
+                    - i (file, size=584)
+                - f (file, size=29116)
+                - g (file, size=2557)
+                - h.lst (file, size=62596)
+            - b.txt (file, size=14848514)
+            - c.dat (file, size=8504156)
+            - d (dir)
+                - j (file, size=4060174)
+                - d.log (file, size=8033020)
+                - d.ext (file, size=5626152)
+                - k (file, size=7214296)
+    """
+
     lines = [
             "$ cd /",
             "$ ls",
@@ -66,7 +106,7 @@ def test_go():
             "7214296 k",
     ]
 
-    root = go(lines)
+    root = parse_folder_from_lines(lines)
     assert root.name == "/"
     assert root.parent is None
     assert len(root.files) == 2
@@ -80,22 +120,17 @@ def test_go():
     assert root.folders[1].name == "d"
     assert root.folders[1].parent is root
 
-# - / (dir)
-#   - a (dir)
-#     - e (dir)
-#       - i (file, size=584)
-#     - f (file, size=29116)
-#     - g (file, size=2557)
-#     - h.lst (file, size=62596)
-#   - b.txt (file, size=14848514)
-#   - c.dat (file, size=8504156)
-#   - d (dir)
-#     - j (file, size=4060174)
-#     - d.log (file, size=8033020)
-#     - d.ext (file, size=5626152)
-#     - k (file, size=7214296)
+    assert len(root.folders[0].folders) == 1
+    assert len(root.folders[0].files) == 3
+    assert root.folders[0].folders[0].name == "e"
+    assert root.folders[0].files[0].name == "f"
+    assert root.folders[0].files[0].size == 29116
+    assert root.folders[0].files[1].name == "g"
+    assert root.folders[0].files[1].size == 2557
+    assert root.folders[0].files[2].name == "h.lst"
+    assert root.folders[0].files[2].size == 62596
 
-
-if __name__ == "__main__":
-    test_go()
-
+    assert len(root.folders[0].folders[0].folders) == 0
+    assert len(root.folders[0].folders[0].files) == 1
+    assert root.folders[0].folders[0].files[0].name == "i"
+    assert root.folders[0].folders[0].files[0].size == 584
