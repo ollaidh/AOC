@@ -24,6 +24,13 @@ class Folder:
             if folder.name == name:
                 return folder
         return None
+    
+    def get_folder_size(self):
+        for file in self.files:
+            self.size += file.size
+        for folder in self.folders:
+            self.size += folder.get_folder_size()
+        return self.size
 
 
 def parse_folder_from_lines(lines: list[str]) -> Folder:
@@ -46,6 +53,7 @@ def parse_folder_from_lines(lines: list[str]) -> Folder:
         else:
             curr_folder.files.append(File(words[1], int(words[0])))
     return root_folder
+
 
 
 def test_folder_get_child_folder():
@@ -139,3 +147,38 @@ def test_parse_folder_from_lines():
     assert len(root.folders[0].folders[0].files) == 1
     assert root.folders[0].folders[0].files[0].name == "i"
     assert root.folders[0].folders[0].files[0].size == 584
+
+
+def test_get_folder_size():
+    lines = [
+            "$ cd /",
+            "$ ls",
+            "dir a",
+            "14848514 b.txt",
+            "8504156 c.dat",
+            "dir d",
+            "$ cd a",
+            "$ ls",
+            "dir e",
+            "29116 f",
+            "2557 g",
+            "62596 h.lst",
+            "$ cd e",
+            "$ ls",
+            "584 i",
+            "$ cd ..",
+            "$ cd ..",
+            "$ cd d",
+            "$ ls",
+            "4060174 j",
+            "8033020 d.log",
+            "5626152 d.ext",
+            "7214296 k",
+    ]
+
+    root = parse_folder_from_lines(lines)
+    root.get_folder_size()
+    assert root.folders[0].folders[0].size == 584  # e dir
+    assert root.folders[0].size == 94853  # a dir
+    assert root.folders[1].size == 24933642  # d dir
+    assert root.size == 48381165  # / dir
