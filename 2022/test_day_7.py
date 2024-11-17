@@ -25,12 +25,23 @@ class Folder:
                 return folder
         return None
     
-    def get_folder_size(self):
+    def compute_folder_size(self) -> int:
         for file in self.files:
             self.size += file.size
         for folder in self.folders:
-            self.size += folder.get_folder_size()
+            self.size += folder.compute_folder_size()
         return self.size
+    
+
+def get_sum_size_folders_less_cutoff(root: Folder, cutoff: int, total_size_less_cutoff: int = 0) -> int:
+        for folder in root.folders:
+            curr_size = folder.size
+            if folder.folders:
+                curr_size += get_sum_size_folders_less_cutoff(folder, cutoff, total_size_less_cutoff)
+            if curr_size <= cutoff:
+                total_size_less_cutoff += curr_size
+            print(total_size_less_cutoff)
+        return total_size_less_cutoff
 
 
 def parse_folder_from_lines(lines: list[str]) -> Folder:
@@ -52,7 +63,14 @@ def parse_folder_from_lines(lines: list[str]) -> Folder:
             curr_folder.folders.append(Folder(words[1], curr_folder, [], []))
         else:
             curr_folder.files.append(File(words[1], int(words[0])))
+    root_folder.compute_folder_size()
     return root_folder
+
+
+def read_input_from_file(filepath: Path) -> list[str]:
+    with open(filepath) as f:
+        result = f.readlines()
+    return result
 
 
 
@@ -120,20 +138,16 @@ def test_parse_folder_from_lines():
     assert root.parent is None
     assert len(root.files) == 2
     assert len(root.folders) == 2
-    assert root.size == 0
     assert root.files[0].name == "b.txt"
     assert root.files[0].size == 14848514
     assert root.files[0].name == "b.txt"
     assert root.files[0].size == 14848514
     assert root.folders[0].name == "a"
     assert root.folders[0].parent is root
-    assert root.folders[0].size == 0
     assert root.folders[1].name == "d"
-    assert root.folders[1].size == 0
     assert root.folders[1].parent is root
 
     assert len(root.folders[0].folders) == 1
-    assert root.folders[0].folders[0].size == 0
     assert len(root.folders[0].files) == 3
     assert root.folders[0].folders[0].name == "e"
     assert root.folders[0].files[0].name == "f"
@@ -149,7 +163,7 @@ def test_parse_folder_from_lines():
     assert root.folders[0].folders[0].files[0].size == 584
 
 
-def test_get_folder_size():
+def test_compute_folder_sum_size():
     lines = [
             "$ cd /",
             "$ ls",
@@ -176,9 +190,21 @@ def test_get_folder_size():
             "7214296 k",
     ]
 
+    # test size of each folder:
     root = parse_folder_from_lines(lines)
-    root.get_folder_size()
     assert root.folders[0].folders[0].size == 584  # e dir
     assert root.folders[0].size == 94853  # a dir
     assert root.folders[1].size == 24933642  # d dir
     assert root.size == 48381165  # / dir
+
+    # test total size of folders with size less than cutoff:
+    result = get_sum_size_folders_less_cutoff(root, 100000)
+    assert result == 95437
+
+
+if __name__ == "__main__":
+    filepath = Path(__file__).parent.resolve() / "inputs/input_day_7.txt"
+    lines = read_input_from_file(filepath)
+    root = parse_folder_from_lines(lines)
+    result_part_1 = get_sum_size_folders_less_cutoff(root, 100000)
+    print(result_part_1)
