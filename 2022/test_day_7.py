@@ -33,15 +33,17 @@ class Folder:
         return self.size
     
 
-def get_sum_size_folders_less_cutoff(root: Folder, cutoff: int, total_size_less_cutoff: int = 0) -> int:
-        for folder in root.folders:
-            curr_size = folder.size
-            if folder.folders:
-                curr_size += get_sum_size_folders_less_cutoff(folder, cutoff, total_size_less_cutoff)
-            if curr_size <= cutoff:
-                total_size_less_cutoff += curr_size
-            print(total_size_less_cutoff)
-        return total_size_less_cutoff
+def get_sum_size_folders_less_cutoff(root: Folder, cutoff: int) -> int:
+        result = 0
+        def calc(root: Folder):
+            if root.size <= cutoff:
+                nonlocal result
+                result += root.size
+            for folder in root.folders:
+                calc(folder)
+        calc(root)
+        return result
+
 
 
 def parse_folder_from_lines(lines: list[str]) -> Folder:
