@@ -34,16 +34,34 @@ class Folder:
     
 
 def get_sum_size_folders_less_cutoff(root: Folder, cutoff: int) -> int:
-        result = 0
-        def calc(root: Folder):
-            if root.size <= cutoff:
-                nonlocal result
-                result += root.size
-            for folder in root.folders:
-                calc(folder)
-        calc(root)
-        return result
+    result = 0
+    def calc(root: Folder):
+        if root.size <= cutoff:
+            nonlocal result
+            result += root.size
+        for folder in root.folders:
+            calc(folder)
+    calc(root)
+    return result
 
+
+def calc_additional_space_needed(disk_size: int, size_to_run: int, root_size: int) -> int:
+    result = max(size_to_run - (disk_size - root_size), 0)
+    return result
+
+
+def calc_folder_to_delete_size(root: Folder, min_folder_size: int) -> int:
+    if min_folder_size == 0:
+        return 0
+    result = root.size
+    def calc(root: Folder):
+        if root.size >= min_folder_size:
+            nonlocal result
+            result = min(result, root.size)
+        for folder in root.folders:
+            calc(folder)
+    calc(root)
+    return result
 
 
 def parse_folder_from_lines(lines: list[str]) -> Folder:
@@ -202,6 +220,12 @@ def test_compute_folder_sum_size():
     # test total size of folders with size less than cutoff:
     result = get_sum_size_folders_less_cutoff(root, 100000)
     assert result == 95437
+
+    additional_space = calc_additional_space_needed(70000000, 30000000, root.size)
+    assert additional_space == 8381165
+
+    folder_size_to_delete = calc_folder_to_delete_size(root, additional_space)
+    assert folder_size_to_delete == 24933642
 
 
 if __name__ == "__main__":
