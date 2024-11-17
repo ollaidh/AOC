@@ -17,6 +17,7 @@ class Folder:
     parent: Self | None
     files: list[File]
     folders: list[Self]
+    size: int = 0
 
     def get_child_folder(self, name: str) -> Self | None:
         for folder in self.folders:
@@ -111,16 +112,20 @@ def test_parse_folder_from_lines():
     assert root.parent is None
     assert len(root.files) == 2
     assert len(root.folders) == 2
+    assert root.size == 0
     assert root.files[0].name == "b.txt"
     assert root.files[0].size == 14848514
     assert root.files[0].name == "b.txt"
     assert root.files[0].size == 14848514
     assert root.folders[0].name == "a"
     assert root.folders[0].parent is root
+    assert root.folders[0].size == 0
     assert root.folders[1].name == "d"
+    assert root.folders[1].size == 0
     assert root.folders[1].parent is root
 
     assert len(root.folders[0].folders) == 1
+    assert root.folders[0].folders[0].size == 0
     assert len(root.folders[0].files) == 3
     assert root.folders[0].folders[0].name == "e"
     assert root.folders[0].files[0].name == "f"
