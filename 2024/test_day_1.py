@@ -50,6 +50,12 @@ def test_get_number_frequency():
     assert get_number_frequency(numbers) == {3: 3, 4: 2, 1: 1}
 
 
+def test_calc_similarity_score():
+    locations_1 = [3, 4, 2, 1, 3, 3]
+    locations_2 = [4, 3, 5, 3, 9, 3]
+    assert calc_similarity_score(locations_1, locations_2) == 31
+
+
 if __name__ == "__main__":
     filepath = Path(__file__).parent.resolve() / "inputs/input_day_1.txt"
     locations_1, locations_2 = get_input_locations(filepath)
