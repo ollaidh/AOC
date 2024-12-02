@@ -20,10 +20,25 @@ def check_safety(levels: list[str]) -> bool:
     return True
 
 
-def count_safe_reports(reports: list[list[str]]) -> int:
+def check_safety_dampener(levels: list[str]) -> bool:
+    if check_safety(levels) is True:
+        return True
+    for i in range(0, len(levels)):
+        levels_without_curr_element = levels[:i]
+        levels_without_curr_element.extend(levels[i + 1:])
+        if check_safety(levels_without_curr_element) is True:
+            return True
+    return False
+
+
+def count_safe_reports(reports: list[list[str]], dumpener: bool) -> int:
     safe_counter = 0
+    if dumpener is True:
+        checker = check_safety_dampener
+    else:
+        checker = check_safety
     for report in reports:
-        if check_safety(report):
+        if checker(report):
             safe_counter += 1
     return safe_counter
 
@@ -61,8 +76,12 @@ def test_check_safety():
 if __name__ == "__main__":
     filepath = Path(__file__).parent.resolve() / "inputs/input_day_2.txt"
     reports = get_input(filepath)
-    result_part_1 = count_safe_reports(reports)
+    result_part_1 = count_safe_reports(reports, False)
     print(result_part_1)
+    result_part_2 = count_safe_reports(reports, True)
+    print(result_part_2)
+
+
 
 
 
