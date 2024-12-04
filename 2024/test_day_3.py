@@ -1,8 +1,14 @@
 import re
 from pathlib import Path
 
+
 def get_muls(input: str):
     pattern = r"mul\((\d+),(\d+)\)"
+    matches = re.findall(pattern, input)
+    return matches
+
+def get_muls_actions(input: str):
+    pattern = r"(mul\(\d+,\d+\)|do\(\)|don't\(\))"
     matches = re.findall(pattern, input)
     return matches
 
@@ -25,6 +31,11 @@ def test_get_muls():
     assert muls == [('2', '4'), ('5', '5'), ('11', '8'), ('8', '5')]
 
 
+def test_get_muls_actions():
+    input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
+    assert get_muls_actions(input) == ['mul(2,4)', "don't()", 'mul(5,5)', 'mul(11,8)', 'do()', 'mul(8,5)']
+
+
 def test_calc_muls_result():
     input = "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"
     muls = calc_muls(input)
@@ -40,3 +51,7 @@ if __name__ == "__main__":
     muls = calc_muls(input)
     result_part_1 = sum_muls(muls)
     print(result_part_1)
+    input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
+
+    a = get_muls_actions(input)
+    print(a)
