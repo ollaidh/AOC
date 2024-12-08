@@ -2,11 +2,6 @@ import re
 from pathlib import Path
 from dataclasses import dataclass
 
-@dataclass
-class Action:
-    do: bool
-    mul: tuple[int] | None
-
 
 def get_muls(input: str):
     pattern = r"mul\((\d+),(\d+)\)"
@@ -32,32 +27,20 @@ def parse_mul(mul: str) -> tuple[int, int]:
     return int(muls[0]), int(muls[1])
 
 
-def parse_do(do: str) -> bool:
-    if "n" in do:
-        return False
-    return True
-
-def filter_active_actions(actions: list[str]):
-    result: list[Action] = []
-    curr_action = Action(True, None)
+def filter_active_actions(actions: list[str]) -> int:
+    do = True
+    result = 0
     for action in actions:
-        if curr_action.do is True and action.startswith('m'):
-            curr_action = Action(True, parse_mul(action))
-            result.append(curr_action)
-        elif action.startswith('d'):
-            curr_action = Action(parse_do(action), None)
+        if action.startswith("d"):
+            do = "n" not in action
+        elif action.startswith("m") and do  is True:
+            args = parse_mul(action)
+            result += args[0] * args[1]
     return result
 
 
 def sum_muls(muls: list[int]) -> int:
     return sum(muls)
-
-
-def sum_muls_actions(actions: list[Action]) -> int:
-    result = 0
-    for action in actions:
-        result += action.mul[0] * action.mul[1]
-    return result
 
 
 def test_get_muls():
@@ -75,26 +58,11 @@ def test_parse_mul():
     input = "mul(42, 24)"
     assert parse_mul(input) == (42, 24)
 
-def test_parse_do():
-    input = "don't()"
-    assert parse_do(input) is False
-
-    input = 'do()'
-    assert parse_do(input) is True
-
-
-def test_filter_active_actions():
-    input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5)yyyyymul(1,2))"
-    actions = get_actions(input)
-    print(filter_active_actions(actions))
-    assert filter_active_actions(actions) == [Action(True, (2, 4)), Action(True, (8, 5)), Action(True, (1, 2))]
-
 
 def test_sum_muls_actions():
     input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
     actions = get_actions(input)
-    active_actions = filter_active_actions(actions)
-    assert sum_muls_actions(active_actions) == 48
+    assert filter_active_actions(actions) == 48
 
 
 def test_calc_muls_result():
@@ -115,7 +83,6 @@ if __name__ == "__main__":
     print(result_part_1)
 
     actions = get_actions(input)
-    active_actions = filter_active_actions(actions)
-    result_part_2 = sum_muls_actions(active_actions)
+    result_part_2 = filter_active_actions(actions)
     print(result_part_2)
 
